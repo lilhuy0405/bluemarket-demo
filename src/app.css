@@ -1,0 +1,44 @@
+.bg {
+    background-color: #262626;
+  }
+  p{
+    color: white;
+  }
+  .text-gray {
+    color: #8e8e8e;
+  }
+  .btn-1 {
+    width: 250px;
+    height: 50px;
+    border-radius: 50px;
+    font-weight: 800;
+    border-color:#ffffff ;
+    color: #fff;
+  }
+
+  .btn-2 {
+     margin-left: 20px;
+     width: 250px;
+     height: 50px;
+     border-radius: 50px;
+     font-weight: 800;
+     border-color:#ffffff ;
+     color: #fff;
+  }
+  
+  .img-1{
+    background-color: #16151a;
+  }
+  .btn-buy {
+    width: 200px;
+    height: 50px;
+    border-radius: 50px;
+    font-weight: 800;
+    border-color:#ffffff ;
+    color: #fff;
+    
+  }
+  .btn-buy:hover {
+    background: #e347b4;
+    border-color:  #e347b4;
+  }

@@ -6,6 +6,15 @@ export const getLocalStorageObject = (key: string) => {
   return JSON.parse(objString);
 };
 
+
+export const removeItemFromLocalStorage = (key: string) => {
+  const inLocalStorage = localStorage.getItem(key);
+  if (!inLocalStorage) {
+    return;
+  }
+  localStorage.removeItem(key);
+};
+
 export const addItemToLocalStorage = (key: string, item: any) => {
   //Stringify items object then add to localStorage
   const existItem = localStorage.getItem(key);
@@ -17,12 +26,4 @@ export const addItemToLocalStorage = (key: string, item: any) => {
     return;
   }
   localStorage.setItem(key, JSON.stringify(item));
-};
-
-export const removeItemFromLocalStorage = (key: string) => {
-  const inLocalStorage = localStorage.getItem(key);
-  if (!inLocalStorage) {
-    return;
-  }
-  localStorage.removeItem(key);
 };

@@ -1,88 +1,103 @@
-import {useConnection} from "../states/connection";
-import {GreetingContract} from "../contractPorts/GreetingContract";
-import {BigNumber, ethers} from "ethers";
+import { useConnection } from "../states/connection";
+import { GreetingContract } from "../contractPorts/GreetingContract";
+import { BigNumber, ethers } from "ethers";
 import MarketContract from "../contractPorts/MarketContract";
+import BlueMarketContract from "../contractPorts/BlueMarketContract";
 import marketAPI from "../services/marketAPI";
-import {BLUE_NFT_ADDRESS, MARKET_CONTRACT_ADDRESS} from "../constants";
+import { BLUE_NFT_ADDRESS, MARKET_CONTRACT_ADDRESS } from "../constants";
+import toast from "react-hot-toast";
 
 const useMarketContract = () => {
-  const {connection} = useConnection();
+  const { connection } = useConnection();
   const provider = connection.provider;
 
-  const listItem = async (nftAddress: string, nftId: number, price: BigNumber) => {
+  const listItem = async (nftAddress: string,nftId: number,price: BigNumber) => {
     if (!provider) {
-      throw new Error('Meta mask not installed or not connected');
+      throw new Error("Meta mask not installed or not connected");
     }
     const signer = provider.getSigner();
     const address = await signer.getAddress();
+    const blueContract = new BlueMarketContract(provider, address)
+    const getApprove = await blueContract.getApprove(nftId)
+    if(getApprove !== MARKET_CONTRACT_ADDRESS) {
+      console.log("getApprove", getApprove);
+      const approve = await blueContract.approved(MARKET_CONTRACT_ADDRESS,nftId)
+      const loadApprove = await approve.wait();
+      toast.success("successful")
+    }
     const marketContract = new MarketContract(provider, address)
     const txnResp = await marketContract.listItem(nftAddress, nftId, price);
     const txnReceipt = await txnResp.wait();
-  }
+  };
 
   const getAllSellingItems = async () => {
     if (!provider) {
-      throw new Error('Meta mask not installed or not connected');
+      throw new Error("Meta mask not installed or not connected");
     }
-    const marketContract = new MarketContract(provider)
+    const marketContract = new MarketContract(provider);
     const totalItems = (await marketContract.getTotalItems()).toNumber();
     const feePercent = (await marketContract.getFee()).toNumber();
-    const listPromise = Array.from(Array(totalItems).keys()).map(async (index) => {
-      try {
-        const item = await marketContract.getMarketItemAt(index + 1);
-        const itemId = item[0].toNumber();
-        const nftAddress = item[1];
-        const tokenId = item[2].toNumber();
-        const priceInWei = item[3];
-        const mintPrice = parseFloat(ethers.utils.formatEther(priceInWei));
-        const price = mintPrice * (feePercent + 100) / 100;
-        const seller = item[4];
-        const isSold = item[5];
-        return {
-          itemId,
-          nftAddress,
-          tokenId,
-          price,
-          seller,
-          isSold
+    const listPromise = Array.from(Array(totalItems).keys()).map(
+      async (index) => {
+        try {
+          const item = await marketContract.getMarketItemAt(index + 1);
+          const itemId = item[0].toNumber();
+          const nftAddress = item[1];
+          const tokenId = item[2].toNumber();
+          const priceInWei = item[3];
+          const mintPrice = parseFloat(ethers.utils.formatEther(priceInWei));
+          const price = (mintPrice * (feePercent + 100)) / 100;
+          const seller = item[4];
+          const isSold = item[5];
+          return {
+            itemId,
+            nftAddress,
+            tokenId,
+            price,
+            seller,
+            isSold,
+          };
+        } catch (err) {
+          console.log(err);
+          return null;
         }
-      } catch (err) {
-        console.log(err)
-        return null;
       }
-    });
+    );
     const items = await Promise.all(listPromise);
     const res: any[] = [];
 
-    const sellingItemTrackingInApi = await marketAPI.getNFTofAnAddress(MARKET_CONTRACT_ADDRESS);
+    const sellingItemTrackingInApi = await marketAPI.getNFTofAnAddress(
+      MARKET_CONTRACT_ADDRESS
+    );
 
     items.forEach((item: any) => {
       if (item.isSold) {
-        return
+        return;
       }
       if (item.nftAddress.toLowerCase() !== BLUE_NFT_ADDRESS.toLowerCase()) {
         return;
       }
-      const isSellingInApi = sellingItemTrackingInApi.find((itemInApi: any) => itemInApi.tokenId === item.tokenId);
+      const isSellingInApi = sellingItemTrackingInApi.find(
+        (itemInApi: any) => itemInApi.tokenId === item.tokenId
+      );
       if (!isSellingInApi) {
         return;
       }
-      res.push({...item, tokenURI: isSellingInApi.tokenURI})
-    })
+      res.push({ ...item, tokenURI: isSellingInApi.tokenURI });
+    });
     return res;
-  }
+  };
 
   const buyItem = async (itemId: number) => {
     if (!provider) {
-      throw new Error('Meta mask not installed or not connected');
+      throw new Error("Meta mask not installed or not connected");
     }
-
-  }
+  };
 
   return {
     getAllSellingItems,
-    listItem
-  }
-}
+    listItem,
+  };
+};
 
 export default useMarketContract;
