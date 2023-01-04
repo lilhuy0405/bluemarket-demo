@@ -26,6 +26,13 @@ class MarketContract extends BaseContract {
   async getTotalItems(): Promise<BigNumber> {
     return await this.getContract().itemCount();
   }
+
+  async purchaseItem(itemId: number, price: BigNumber) {
+    if (!this.isWritable()) {
+      throw Error("Contract is not writable");
+    }
+    return await this.getContract().purchaseItem(itemId, {value: price});
+  }
 }
 
 export default MarketContract;

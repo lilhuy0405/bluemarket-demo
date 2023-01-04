@@ -7,10 +7,12 @@ import {toast} from "react-hot-toast";
 import useMarketContract from "../hooks/useMarketContract";
 import {ethers} from "ethers";
 import {BLUE_NFT_ADDRESS, MARKET_CONTRACT_ADDRESS} from "../constants";
+import MintNFTModal from "./MintNFTModal";
 
 const UserNFT = () => {
   const {connection} = useConnection()
   const [openModal, setOpenModal] = useState(false)
+  const [openMintModal, setOpenMintModal] = useState(false)
   const [toSellTokenId, setToSellTokenId] = useState(0);
   const {listItem} = useMarketContract();
   const {data = [], isLoading, isError, refetch} = useQuery(["marketAPI.getNFTofAnAddress()", connection.address],
@@ -41,6 +43,9 @@ const UserNFT = () => {
     <div>
       <div style={{display: 'flex', justifyContent: 'center'}}>
         <h4>My NFTS</h4>
+      </div>
+      <div style={{display: 'flex', justifyContent: 'end'}}>
+        <Button onClick={() => setOpenMintModal(true)}>Mint NFT</Button>
       </div>
       <Row gutter={24}>
         {
@@ -84,6 +89,9 @@ const UserNFT = () => {
           </Form.Item>
         </Form>
       </Modal>
+      <MintNFTModal isOpen={openMintModal} onClose={() => setOpenMintModal(false)} onMintSuccess={async () => {
+        await refetch();
+      }}/>
     </div>
   )
 }
