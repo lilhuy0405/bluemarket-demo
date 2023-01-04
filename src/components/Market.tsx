@@ -8,7 +8,7 @@ import {useEffect, useState} from "react";
 import {Button, Card, Col, Image, Row, Skeleton} from "antd";
 
 const Market = () => {
-  const {getAllSellingItems} = useMarketContract();
+  const {getAllSellingItems, buyItem} = useMarketContract();
   const {isActive} = useWeb3()
   const [sellingItems, setSellingItems] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -28,6 +28,17 @@ const Market = () => {
     if (!isActive) return
     fetchSellingItems().then()
   }, [isActive])
+
+  const handleBuyNFT = async (itemId: number) => {
+    try {
+      await buyItem(itemId)
+      //sleep 3s to wait for the transaction to be mined and updated in the be
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      await fetchSellingItems()
+    } catch (err) {
+      console.log(err)
+    }
+  }
   return (
     <div>
       <div style={{textAlign: 'center'}}>
@@ -46,7 +57,7 @@ const Market = () => {
                     Price: {item.price.toFixed(4)} BNB
                   </div>
                   <div>
-                    <Button>Buy</Button>
+                    <Button onClick={async () => await handleBuyNFT(item.itemId)}>Buy</Button>
                   </div>
                 </Card>
               </Col>

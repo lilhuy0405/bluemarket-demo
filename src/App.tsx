@@ -16,15 +16,17 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <button onClick={isActive ? deActivate : activate}>
-        {isActive ? connection.address : "Connect"}
-      </button>
-      {isActive && (
-        <UserNFT/>
-      )}
-      <Divider/>
-      <Market/>
-      <Toaster/>
+      <div style={{width: '80%', margin: '0 auto'}}>
+        <button onClick={isActive ? deActivate : activate}>
+          {isActive ? connection.address : "Connect"}
+        </button>
+        {isActive && (
+          <UserNFT/>
+        )}
+        <Divider/>
+        <Market/>
+        <Toaster/>
+      </div>
     </QueryClientProvider>
   )
 }
